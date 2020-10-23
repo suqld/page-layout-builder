@@ -75,6 +75,9 @@ You may [Upgrade to Pro](http://wpeden.com/minimax-wordpress-page-layout-builder
 
 == Changelog ==
 
+= 2.0.4 =
+* Minor fix for removal of jquery migrate from WP 5.5
+
 = 2.0.3 =
 * WP 4.5 compatibility release
 * Added new module [ Feature Box - 2 templates available ] [ Check screenshots ]
