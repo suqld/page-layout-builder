@@ -1,9 +1,9 @@
 === MiniMax - Page Layout Builder ===
 Contributors: codename065, shahriar0822
 Donate link: http://wpeden.com/minimax-wordpress-page-layout-builder-plugin/
-Tags: content builder, page builder, layout builder, theme builder, squeeze page builder, sales page builder, drag and drop page builder, drag and drop content builder, drag drop
+Tags: page builder, front-end builder, layout builder, visual builder, content builder, squeeze page builder, sales page builder, drag and drop page builder, widget, drag drop, image widget, richtext widget
 Requires at least: 3.5
-Tested up to: 4.2.2
+Tested up to: 4.5
 License: GPLv2 or later
  
   
@@ -12,12 +12,12 @@ Drag and Drop Responsive Page Builder / Layout Builder / Content Builder for Wor
    
 
 == Description ==
-Drag and Drop Page Builder / Layout Builder / Content Builder for WordPress. Building custom WordPress page layout using Page Layout Builder is just as easy as drag-and-drop. You don't need to run for learning HTML or finding a coder/designer to change a page layout. We also developing all necessary modules like sliders, galleries, images, drop-down menu, progress bar, timeline, testimonials, message box, warning box, notification box, loop for custom post type, post loop with various templates, sub-pages, heading, regular html and many more to build a eye catching page layout or a complete theme just from a blank canvas within few minutes even without knowing or writing a single html code.
+Drag and Drop Page Builder / Layout Builder for WordPress. You don't need to run for learning HTML or finding a coder/designer to change a page layout. We also developing all necessary modules like sliders, galleries, images, progress bar, timeline, testimonials, message box, warning box, notification box, loop for custom post type, post loop with various templates, sub-pages, heading, regular html and many more to build a page or a complete theme just from a blank canvas within few minutes.
 
-= Use With Any Theme =
+= Works with any theme =
 Minimax- Layout Builder is compatible with any theme. Just install and start using with existing theme.
 
-= Anyone Can Build, No coding required =
+= Anyone can Build, No coding required =
 No coding knowledge is required to use Minimax - Layout Builder Plugin for WordPress. Everything is just drag and drop here. Page Layout Builder will give you all power to do anything within a page layout without editing code.
 
 = Export Import Layout =
@@ -26,10 +26,12 @@ Yes, you can even export your page layout and import it to another site with min
 = Squeeze Page =
 Minimax - Layout Builder Plugin for WordPress packaged with special options for building squeeze pages with all necessary modules. Build a landing page within minutes.
 
-= Works with widgets from wordpress.org =
+= Works with any WordPress widgets =
 You can directly use more than 3000+ widgets from wordpress.org to place anywhere inside your page content. No longer need to hang with built in sidebars with theme.
 
-Do anything within your imagination. Yes, it is time to take control over your website and its content. 
+Do anything within your imagination. Yes, it is time to take control over your website and its content.
+
+Read Page Builder [documention](http://wpeden.com/minimax-wordpress-page-layout-builder-plugin/docs/)
 
 [youtube https://www.youtube.com/watch?v=iPQAYdP2kyI]
 
@@ -43,6 +45,7 @@ What You See Is What You Get
 * Tabs Module
 * Accordion Module with 6 predefined styles
 * Sub-pages module
+* Notice module
 
 = Want more modules? =
 You may [Upgrade to Pro](http://wpeden.com/minimax-wordpress-page-layout-builder-plugin/ "30+ modules and Extensive Front-end Page Builder") for 30+ modules & Extensive features of front-end page builder
@@ -67,9 +70,40 @@ You may [Upgrade to Pro](http://wpeden.com/minimax-wordpress-page-layout-builder
 2. Front-end Preview from Screenshot #1
 3. Widgets window
 4. Front-end Mobile Device Preview from Screenshot #1
-
+5. Feature Box with Border(New Module)
+6. Feature Box Simple (New Module)
 
 == Changelog ==
+
+= 2.0.3 =
+* WP 4.5 compatibility release
+* Added new module [ Feature Box - 2 templates available ] [ Check screenshots ]
+
+= 2.0.2 =
+* [ NEW ] Now you can create Full Width row using MiniMax
+* Few changes in Frontend Builder
+* Fixed some css issues
+* Fixed row and modules spcing issue
+
+= 2.0.1 =
+* Fixed a css issue some of users facing in layout insert row
+* Fixed some bug in Row settings spacing
+
+= 2.0.0 =
+* Updated admin and frontend builder UI to make it more user friendly
+* Optimized code for better performance
+* Fixed media modal issue
+* Added settings to enable/disable plugin Bootstrap CSS/JS when active theme using Bootstrap
+* Added new module 'Notice'
+
+= 1.9.3 =
+* Fixed image alt tag issue ( It was always set as 'No Image' )
+
+= 1.9.2 =
+* Fixed an issue related to setting post featured image 
+
+= 1.9.1 =
+* Richtext editor issue in latest WordPress has been fixed ( backend and frotend editor )
 
 = 1.9.0 =
 * Updated frontend builder look

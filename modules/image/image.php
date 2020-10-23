@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Image 
+Plugin Name: Image with Text
 Plugin URI: #
 Description: Image module for minimax
 Author: Shaon
@@ -10,67 +10,58 @@ Author URI: #
 
 class MiniMax_Image extends WP_Widget {
     function __construct() {
-        parent::WP_Widget( 
-                    'MiniMax_Image',                        /* Base ID */
-                    'Image',                                /* Name */ 
-                    array( 'description' => 'Image Widget' )/* Args */ 
-                );
+        parent::__construct( 'MiniMax_Image', 'Image with Text', array( 'description' => 'Image Widget' ) );
     }
 
-    /** @see WP_Widget::widget */
     function widget( $args, $instance ) {
-         wp_enqueue_style("minimax-image",base_theme_url.'/modules/image/image.css');
-         $style = $instance['style'] ;
-         $fn = "image_$style";
-         $this->{$fn}($args, $instance);
+        wp_enqueue_style( "minimax-image", base_theme_url.'/modules/image/image.css');
+        $style = $instance['style'] ;
+
+        $imgurl = $instance['url'];
+
+        if (strpos($imgurl, 'wp-content/') !== false) {
+            $rurl = explode('wp-content/',$imgurl);
+            $instance['url'] = content_url('/').$rurl[1];
+        }
+
+        $fn = "image_$style";
+        $this->{$fn}($args, $instance);
     }
 
     function preview($instance){
-        extract($instance);
-        
-        $imgpath = str_replace(site_url('/'), ABSPATH, $url);
-        $thumbpath = minimax_dynamic_thumb($imgpath, array(50, 50));
-        $thumburl = str_replace(ABSPATH, site_url('/'), $thumbpath);
-                  
-        echo "<div class='widget'>";
-        ?>
+        $args = array();
+        $style = $instance['style'] ;
 
-        <div class="media">
-            <a href="#" class="pull-left thumbnail" style="margin-right: 5px !important;">
-                <img class="imgbr" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="<?php echo $alt; ?>">
-            </a>
-            <div class="meida-body" style="padding-top:5px !important;">
-                <h3 class='media-heading'><i class="icon icon-th"></i> <?php echo $title; ?></h3>
-                <i class="icon icon-link"></i> <?php echo $link; ?><br/>
-                <i class='icon icon-resize-horizontal'></i> Width: <?php echo $imgw;?>
-                <i class='icon icon-resize-vertical'></i> Height: <?php echo $imgh;?> <br/>
-                <i class='icon icon-eye-open'></i> Style: <?php echo $style;?>
-            </div>
-        </div>
-        <div style="clear: both;"></div>
+        $imgurl = $instance['url'];
 
-        <?php
-        echo "</div>";
+        if (strpos($imgurl, 'wp-content/') !== false) {
+            $rurl = explode('wp-content/',$imgurl);
+            $instance['url'] = content_url('/').$rurl[1];
+        }
+
+        $fn = "image_$style";
+        $this->{$fn}($args, $instance);
     }
     
     function image_2l($args, $instance){
         extract( $args );       
         extract($instance);             
         $id = uniqid();
-        if($imgw && $imgh){
-            $imgpath = str_replace(site_url('/'), ABSPATH, $url);
-            $thumbpath = minimax_dynamic_thumb($imgpath, array($imgw, $imgh));
-            $thumburl = str_replace(ABSPATH, site_url('/'), $thumbpath);
+
+        if(isset($imgw) && isset($imgh)){
+            $imgpath = str_replace( site_url('/'), ABSPATH, $url );
+            $thumbpath = minimax_dynamic_thumb( $imgpath, array( $imgw, $imgh ) );
+            $thumburl = str_replace( ABSPATH, site_url('/'), $thumbpath );
         }
         else
             $thumburl = $url;
         
-        echo $before_widget;
+        echo isset($before_widget) ? $before_widget : '';
         ?>
         <div class="media">
             <div class="pull-left">
                 <?php if($link !='') echo '<a href="'.$link.'">'; ?>
-                <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="No Image">
+                <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="<?php echo $title; ?>">
                 <?php if($link !='') echo '</a>'; ?>
             </div>
             <div class="media-body" id="mx-img-txt-<?php echo $id; ?>">
@@ -85,27 +76,27 @@ class MiniMax_Image extends WP_Widget {
         </div> 
          
         <?php
-        echo $after_widget;         
+        echo isset($after_widget) ? $after_widget : '';
     }
     
     function image_2r($args, $instance){
         extract( $args );       
         extract($instance);             
         $id = uniqid();
-        if($imgw && $imgh){
+        if(isset($imgw) && isset($imgh)){
             $imgpath = str_replace(site_url('/'), ABSPATH, $url);
             $thumbpath = minimax_dynamic_thumb($imgpath, array($imgw, $imgh));
             $thumburl = str_replace(ABSPATH, site_url('/'), $thumbpath);
         }
         else
             $thumburl = $url;
-        
-        echo $before_widget; 
+
+        echo isset($before_widget) ? $before_widget : '';
         ?>
         <div class="media">
             <div class="pull-right">
                 <?php if($link !='') echo '<a href="'.$link.'">'; ?>
-                    <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl;?>" title="<?php echo $title; ?>" alt="No Image">
+                    <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl;?>" title="<?php echo $title; ?>" alt="<?php echo $title; ?>">
                 <?php if($link !='') echo '</a>'; ?>
             </div>
         
@@ -121,26 +112,26 @@ class MiniMax_Image extends WP_Widget {
             </div>
         </div>
         <?php
-        echo $after_widget;         
+        echo isset($after_widget) ? $after_widget : '';
     }
     
     function image_1t($args, $instance){
         extract( $args );       
         extract($instance);             
         $id = uniqid();
-        if($imgw && $imgh){
+        if(isset($imgw) && isset($imgh)){
             $imgpath = str_replace(site_url('/'), ABSPATH, $url);
             $thumbpath = minimax_dynamic_thumb($imgpath, array($imgw, $imgh));
             $thumburl = str_replace(ABSPATH, site_url('/'), $thumbpath);
         }
         else
             $thumburl = $url;
-        
-        echo $before_widget;
+
+        echo isset($before_widget) ? $before_widget : '';
         ?>
            
         <?php if($link !='') echo '<a href="'.$link.'">'; ?>
-            <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="No Image">
+            <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="<?php echo $title; ?>">
         <?php if($link !='') echo '</a>';         
         
         echo '<'.$titleh.'>';
@@ -148,24 +139,24 @@ class MiniMax_Image extends WP_Widget {
                 echo $title;
             if($link !='') echo '</a>'; 
         echo '</'.$titleh.'>';
-        echo '<p>'.$desc.'</p>';               
-        
-        echo $after_widget;         
+        echo '<p>'.$desc.'</p>';
+
+        echo isset($after_widget) ? $after_widget : '';
     }
     
     function image_1l($args, $instance){
         extract( $args );       
         extract($instance);             
         $id = uniqid();
-        if($imgw && $imgh){
+        if( isset($imgw) && isset($imgh) ){
             $imgpath = str_replace(site_url('/'), ABSPATH, $url);
             $thumbpath = minimax_dynamic_thumb($imgpath, array($imgw, $imgh));
             $thumburl = str_replace(ABSPATH, site_url('/'), $thumbpath);
         }
         else
             $thumburl = $url;
-        
-        echo $before_widget; 
+
+        echo isset($before_widget) ? $before_widget : '';
         ?>
         <?php 
         echo '<'.$titleh.'>';
@@ -176,27 +167,28 @@ class MiniMax_Image extends WP_Widget {
         ?> 
             <div class="pull-left" style="margin-right: 10px; margin-top: 5px;">
                 <?php if($link !='') echo '<a href="'.$link.'">'; ?>
-                    <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="No Image">
+                    <img class="img-responsive img-<?php echo $bootstrap_style; ?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="<?php echo $title; ?>">
                 <?php if($link !='') echo '</a>'; ?>
             </div>
         <?php echo '<p>'.$desc.'</p>';
-        
-        echo $after_widget;         
+        echo '<div class="clear"></div>';
+
+        echo isset($after_widget) ? $after_widget : '';
     }
-    
+
     function image_1r($args, $instance){
         extract( $args );       
         extract($instance);             
         $id = uniqid();
-        if($imgw && $imgh){
+        if(isset($imgw) && isset($imgh)){
             $imgpath = str_replace(site_url('/'), ABSPATH, $url);
             $thumbpath = minimax_dynamic_thumb($imgpath, array($imgw, $imgh));
             $thumburl = str_replace(ABSPATH, site_url('/'), $thumbpath);
         }
         else
             $thumburl = $url;
-        
-        echo $before_widget;
+
+        echo isset($before_widget) ? $before_widget : '';
         ?>
         <?php 
         echo '<'.$titleh.'>';
@@ -207,30 +199,32 @@ class MiniMax_Image extends WP_Widget {
         ?>
             <div class="pull-right" style="margin-left: 10px;margin-top: 5px;">
                 <?php if($link !='') echo '<a href="'.$link.'">'; ?>
-                <img class="img-responsive img-<?php echo $bootstrap_style;?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="No Image">
+                <img class="img-responsive img-<?php echo $bootstrap_style; ?>" src="<?php echo $thumburl; ?>" title="<?php echo $title; ?>" alt="<?php echo $title; ?>">
                 <?php if($link !='') echo '</a>'; ?>
             </div>
         <?php echo '<p>'.$desc.'</p>';
-        
-        echo $after_widget;         
-    }
-    
+        echo '<div class="clear"></div>';
 
-    /** @see WP_Widget::update */
+        echo isset($after_widget) ? $after_widget : '';
+    }
+
     function update( $new_instance, $old_instance ) {
         $instance = $new_instance;       
         return $instance;
     }
 
-    /** @see WP_Widget::form */
     function form( $instance ) {
-            if ( $instance ) {
-                extract($instance);
+
+        if(isset($instance['url'])){
+            $imgurl = $instance['url'];
+            if (strpos($imgurl, 'wp-content/') !== false) {
+                $rurl = explode('wp-content/',$imgurl);
+                $instance['url'] = content_url('/').$rurl[1];
             }
-            else{
-                $imgw = 200;
-                $imgh = 200;
-            }
+        }
+
+        if ( $instance ) { extract($instance); }
+        else{ $imgw = 200; $imgh = 200; }
         ?>
         
         <div id="tabpane">
@@ -258,11 +252,22 @@ class MiniMax_Image extends WP_Widget {
             <label for="<?php echo $this->get_field_id('desc'); ?>"><?php _e('Description:'); ?></label> 
             <textarea class="widefat" id="<?php echo $this->get_field_id('desc'); ?>" name="<?php echo $this->get_field_name('desc'); ?>" ><?php echo $desc; ?></textarea>
         </p>
+
         <p>
-            <label for="<?php echo $this->get_field_id('url'); ?>"><?php _e('Image URL:'); ?></label> <Br/>
-            <input class="widefat" id="<?php echo $this->get_field_id('url'); ?>" name="<?php echo $this->get_field_name('url'); ?>" type="text" value="<?php echo $url; ?>" />
-            <br><br><input type="button" style="font-size: 10px;" value="Browse" onclick="mediaupload('<?php echo $this->get_field_id('url'); ?>')" />
+            <?php
+            $html = "<div>
+                        <input class='form-control' style='width: 90%;float: left;margin-right: 5px' type='text' name='{$this->get_field_name('url')}' id='{$this->get_field_id('url')}' value='{$url}' />
+                        <span class='input-group-button'>
+                            <button rel='#{$this->get_field_id('url')}' class='btn btn-media-upload ui-button' type='button' style='height: 34px'>
+                                <i class='glyphicon glyphicon-link'></i>
+                            </button>
+                        </span>
+                     </div>";
+            ?>
+            <label for="<?php echo $this->get_field_id('url'); ?>"><?php _e('Image URL:'); ?></label>
+            <?php echo $html; ?>
         </p>
+
         <p>
             <label for="<?php echo $this->get_field_id('link'); ?>"><?php _e('Link URL:'); ?></label> 
             <input class="widefat" id="<?php echo $this->get_field_id('link'); ?>" name="<?php echo $this->get_field_name('link'); ?>" type="text" value="<?php echo $link; ?>" />
@@ -307,11 +312,43 @@ class MiniMax_Image extends WP_Widget {
         </div>
         
         </div>
-   
+        <script>
+            // Slect BG from Media
+            var file_frame, dfield;
+            jQuery('body').on('click', '.btn-media-upload' , function( event ){
+                event.preventDefault();
+                dfield = jQuery(jQuery(this).attr('rel'));
+
+                // If the media frame already exists, reopen it.
+                if ( file_frame ) {
+                    file_frame.open();
+                    return;
+                }
+
+                // Create the media frame.
+                file_frame = wp.media.frames.file_frame = wp.media({
+                    title: jQuery( this ).data( 'uploader_title' ),
+                    button: {
+                        text: jQuery( this ).data( 'uploader_button_text' )
+                    },
+                    multiple: false  // Set to true to allow multiple files to be selected
+                });
+
+                // When an image is selected, run a callback.
+                file_frame.on( 'select', function() {
+                    // We set multiple to false so only get one image from the uploader
+                    attachment = file_frame.state().get('selection').first().toJSON();
+                    dfield.val(attachment.url);
+
+                });
+
+                // Finally, open the modal
+                file_frame.open();
+            });
+
+        </script>
         <?php 
     }
-
-} // class Foo_Widget
-
+}
 
 add_action( 'widgets_init', create_function( '', 'register_widget("minimax_image");' ) );

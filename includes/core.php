@@ -1,15 +1,16 @@
 <?php
 
 global $mxwidgets, $minimax_layout_data, $minimax_modules, $wp_widget_factory, $minimax_modules_settings, $minimax_options, $minimax_layout_settings;
-define("base_theme_url",plugins_url('page-layout-builder'));
+define("base_theme_url", plugins_url('page-layout-builder'));
 
-include("template-tags.php");
 include("metabox.php");
 
 error_reporting(0);
 ini_set('display_errors', 0);
 
-//Load minimax active theme option data
+/* 
+ * Load minimax active theme option data 
+ */
 function minimax_load_theme_option_data(){
     global $minimax_layout_data, $minimax_modules, $minimax_modules_settings, $minimax_options;
     $minimax_options = get_option("wpeden_admin");
@@ -25,82 +26,126 @@ function minimax_load_theme_option_data(){
     }
 }
 
-//Load active wp widgets
+/**
+ * Load active WP Widgets
+ */
 function minimax_wp_widgets(){
     global $mxwidgets, $wp_widget_factory;    
     $mxwidgets = $wp_widget_factory->widgets;
 }
 
-//Layout holder (site)
+/**
+ * Layout holder (site)
+ */
 function minimax_layout_holder($name){
     global $minimax_layout_holder, $minimax_layout_data, $minimax_modules;     
     if(is_array($minimax_layout_data[$name])){
-    foreach($minimax_layout_data[$name] as $id=>$layout):
-    minimax_render_layout($layout, $id, $name);
-    endforeach;
+        foreach($minimax_layout_data[$name] as $id=>$layout):
+            minimax_render_layout($layout, $id, $name);
+        endforeach;
     }
-    
 }
 
-/*
+/**
  * Page layout renderer (site)
  */
-function minimax_page_layout($content){    
-    $pid = get_the_ID();        
+function minimax_page_layout($content){
+     $pid = get_the_ID();
 
     if( file_exists(MX_CACHE_DIR.$pid) && get_option('minimax_cahce_status',0) == 1 && get_option('minimax_frontend_editing',0) == 0 )
             return $content.file_get_contents(MX_CACHE_DIR.$pid);
-    
-    ob_start();   
-    $minimax_layout_data = get_post_meta($pid,'minimax_layout',true);     
-    $minimax_modules = get_post_meta($pid,'minimax_modules',true);        
-    $minimax_modules_settings = get_post_meta($pid,'minimax_modules_settings',true);
-    
+
+    ob_start();
+    $minimax_layout_data = get_post_meta($pid,'minimax_layout',true);
+    //$minimax_modules = get_post_meta($pid,'minimax_modules',true);
+    //$minimax_modules_settings = get_post_meta($pid,'minimax_modules_settings',true);
+
     if(is_array($minimax_layout_data[get_post_type()])):
+
         echo "<div class='w3eden' id='layout_".get_post_type()."'>";
-        if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0) == 1)
-            echo "<ul class='layout-data mxrows'>";
-        
-        foreach($minimax_layout_data[get_post_type()] as $id=>$layout):
-            minimax_render_layout($layout, $id, get_post_type());
+        if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0) == 1) echo "<ul class='layout-data mxrows'>";
+
+        foreach($minimax_layout_data[get_post_type()] as $id => $layout):
+            minimax_render_layout( $layout, $id, get_post_type() );
         endforeach;
-        
-        if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0) == 1)
-            echo "</ul>";
+
+        if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0) == 1) echo "</ul>";
         echo "</div>";
+
     endif;
-    
+
     $data = ob_get_clean();
-    if(get_option('minimax_cahce_status',0)==1 && get_option('minimax_frontend_editing',0)==0)
-    file_put_contents(MX_CACHE_DIR.$pid, $data);
+
+    if(get_option('minimax_cahce_status',0) == 1 && get_option('minimax_frontend_editing',0) == 0)
+        file_put_contents(MX_CACHE_DIR.$pid, $data);
 
     $dialog = "";
-    if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==1 && (is_page()||is_single()))
-    $dialog =   '<div id="dialog" title="Basic dialog">Dialog</div>
-                    <input type="hidden" name="frontend_minimax" value="1" class="mx-input" />
-                    <input type="hidden" name="post_id" value="'.$pid.'" class="mx-input" />
+
+    if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==1 && (is_page()||is_single())):
+        $dialog =   '<div id="dialog" title="Basic dialog">Dialog</div>
+                    <input type="hidden" name="frontend_minimax" value="1" class="mx-input"/>
+                    <input type="hidden" name="post_id" value="'.$pid.'" class="mx-input"/>
                     <div id="mx-toolbar" class="w3eden">
                     <div class="panel panel-default">
                         <div class="panel-heading">Insert Row <a class="pull-right btn btn-xs btn-danger" title="Disable Front-end Editing"  href="'.home_url('/?mxfrontend=0').'"><i class="fa fa-times"></i></a></div>
                         <div class="panel-body">
-                        <a href="#" rel="col-1" holder="#layout_'.get_post_type().'" class="insert-layout  btn btn-sm btn-default btn-block "><i class="fa fa-plus-circle"></i>1 Col Row</a>
-                        <a href="#" rel="col-2" holder="#layout_'.get_post_type().'" class="insert-layout  btn btn-sm btn-default btn-block "><i class="fa fa-plus-circle"></i>2 Cols Row</a>
-                        <a href="#" rel="col-3" holder="#layout_'.get_post_type().'" class="insert-layout  btn btn-sm btn-default btn-block "><i class="fa fa-plus-circle"></i>3 Cols Row</a>
-                        <a href="#" rel="col-4" holder="#layout_'.get_post_type().'" class="insert-layout  btn btn-sm btn-default btn-block "><i class="fa fa-plus-circle"></i>4 Cols Row</a>
-                        <a href="#" rel="col-5" holder="#layout_'.get_post_type().'" class="insert-layout  btn btn-sm btn-default btn-block "><i class="fa fa-plus-circle"></i>5 Cols Row</a>
-                        <a href="#" rel="col-6" holder="#layout_'.get_post_type().'" class="insert-layout  btn btn-sm btn-default btn-block "><i class="fa fa-plus-circle"></i>6 Cols Row</a>
+                        <a href="#" rel="col-1" holder="#layout_'.get_post_type().'" class="insert-layout btn btn-sm btn-default btn-block"><i class="fa fa-plus-circle"></i>1 Col Row</a>
+                        <a href="#" rel="col-2" holder="#layout_'.get_post_type().'" class="insert-layout btn btn-sm btn-default btn-block"><i class="fa fa-plus-circle"></i>2 Cols Row</a>
+                        <a href="#" rel="col-3" holder="#layout_'.get_post_type().'" class="insert-layout btn btn-sm btn-default btn-block"><i class="fa fa-plus-circle"></i>3 Cols Row</a>
+                        <a href="#" rel="col-4" holder="#layout_'.get_post_type().'" class="insert-layout btn btn-sm btn-default btn-block"><i class="fa fa-plus-circle"></i>4 Cols Row</a>
+                        <a href="#" rel="col-5" holder="#layout_'.get_post_type().'" class="insert-layout btn btn-sm btn-default btn-block"><i class="fa fa-plus-circle"></i>5 Cols Row</a>
+                        <a href="#" rel="col-6" holder="#layout_'.get_post_type().'" class="insert-layout btn btn-sm btn-default btn-block"><i class="fa fa-plus-circle"></i>6 Cols Row</a>
                         </div>
                         <div class="panel-footer">
-                            <button class="btn btn-primary btn-block" id="scng"><i class="fa fa-save"></i> Save Changes</button>
+                            <button class="btn btn-success btn-block" id="scng"><i class="fa fa-save"></i> Save Changes</button>
                         </div>
                     </div>
                 </div>';
-    if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==0 && (is_page()||is_single()))
-    $dialog =   '<div id="mx-toolbar" style="position:fixed;left:20px;top:80px;z-index:99999;" class="w3eden">
-                    <a title="Enable Front-end Editing" style="background:#34C3A7;height:50px; width:50px; border-radius:2px !important;" class="btn btn-lg ttip" href="'.home_url('/?mxfrontend=1').'">
-                        <i class="fa fa-pencil"></i>
-                    </a>
+
+
+        $dialog =   '<div id="dialog" title="Basic dialog">Dialog</div>
+                    <input type="hidden" name="frontend_minimax" value="1" class="mx-input"/>
+                    <input type="hidden" name="post_id" value="'.$pid.'" class="mx-input"/>
+                    <div id="mx-toolbar" class="w3eden">
+
+                    <div id="mx-controls">
+                        <div class="mx-toolbar-close">
+                            <a class="" title="Disable Front-end Editing"  href="'.home_url('/?mxfrontend=0').'"><i class="fa fa-times"></i></a>
+                        </div>
+                        <div class="mx-col-layout">
+                            <a href="#" rel="col-1" holder="#layout_'.get_post_type().'" class="insert-layout">1 Col Row</a>
+                        </div>
+                        <div class="mx-col-layout">
+                            <a href="#" rel="col-2" holder="#layout_'.get_post_type().'" class="insert-layout">2 Cols Row</a>
+                        </div>
+                        <div class="mx-col-layout">
+                            <a href="#" rel="col-3" holder="#layout_'.get_post_type().'" class="insert-layout">3 Cols Row</a>
+                        </div>
+                        <div class="mx-col-layout">
+                            <a href="#" rel="col-4" holder="#layout_'.get_post_type().'" class="insert-layout">4 Cols Row</a>
+                        </div>
+                        <div class="mx-col-layout">
+                            <a href="#" rel="col-5" holder="#layout_'.get_post_type().'" class="insert-layout">5 Cols Row</a>
+                        </div>
+                        <div class="mx-col-layout">
+                            <a href="#" rel="col-6" holder="#layout_'.get_post_type().'" class="insert-layout">6 Cols Row</a>
+                        </div>
+                        <div class="mx-save-changes">
+                            <a class="" id="scng"><i class="fa fa-save"></i> Save Changes</a>
+                        </div>
+                    </div>
+
                 </div>';
+
+        endif;
+
+    if( current_user_can( 'edit_posts' ) && get_option('minimax_frontend_editing',0) == 0 && ( is_page() || is_single() ) ):
+        $dialog = '<div id="minimax-front-builder" style="position:fixed;left:40px;bottom:50px;z-index:99999;" class="w3eden">
+                        <a title="Enable MiniMax Frontend Editing" class="ttip minimax-fe" href="' . home_url('/?mxfrontend=1') . '">
+                            <i class="fa fa-magic"></i> Enable Frontend Builder
+                        </a>
+                    </div>';
+    endif;
 
     return $content.$data.$dialog;
 }
@@ -113,18 +158,23 @@ function minimax_enable_frontend(){
     }
 }
 
-//Select Layout (admin)
-function minimax_select_layout(){
-    if(!isset($_GET['task'])||$_GET['task']!='select_layout') return;
-    include("layout-selector.php");
-    die();
-}
-
 //Insert Layout (admin)
 function minimax_insert_layout(){
     $id = uniqid();              
     $holder = $_REQUEST['holder'];
-    echo '<li id="row_li_'.$id.'"><input id="row_settings_'.$id.'" type="hidden" name="layout_settings['.$holder.']['.$_GET['layout'].']['.$id.']" value="" /><div class="row-handler"><div class="sort"></div><div rel="row_li_'.$id.'" class="rdel delete dtooltip" title="Delete this Row?"></div><div class="rsettings dtooltip" title="Row CSS Settings" rel="row_settings_'.$id.'"></div><div class="rclone dtooltip" title="Clone this Row" rel="row_li_'.$id.'" rthis="'.$id.'"></div></div><div class="row-container"><div class="container_12 clearfix wrapper row" id="row_'.$id.'"><input type="hidden" name="layouts['.$holder.']['.$id.']" value="'.(isset($_REQUEST['layout'])?$_REQUEST['layout']:'').'" />';
+
+    echo '<li id="row_li_'.$id.'">
+            <input id="row_settings_'.$id.'" type="hidden" name="layout_settings['.$holder.']['.$_GET['layout'].']['.$id.']" value="" />
+            <div class="row-handler">
+                <div class="sort dtooltip" title="Drag this row"><span class="minimax-icons minimax-move"></span></div>
+                <div rel="row_li_'.$id.'" class="rdel delete dtooltip" title="Delete this Row ?"><span class="minimax-icons minimax-cross"></span></div>
+                <div class="rsettings dtooltip" title="Row CSS Settings" rel="row_settings_'.$id.'"><span class="minimax-icons minimax-cog"></span></div>
+                <div class="rclone dtooltip" title="Clone this Row" rel="row_li_'.$id.'" rthis="'.$id.'"><span class="minimax-icons minimax-clone"></span></div>
+            </div>
+            <div class="row-container">
+                <div class="container_12 clearfix wrapper row" id="row_'.$id.'">
+                    <input type="hidden" name="layouts['.$holder.']['.$id.']" value="'.(isset($_REQUEST['layout'])?$_REQUEST['layout']:'').'" />';
+
     $cols = (int)str_replace("col-","", $_GET['layout']);
     include(MX_THEME_DIR."/frames/dynamic.frame.php");
     echo "</div></div><div class='clear'></div></li>";
@@ -167,80 +217,150 @@ function minimax_layout_settings_data(){
 }
 
 //Render saved layout frames (admin)
-function minimax_render_layout_frames($holder){     
+function minimax_render_layout_frames($holder){
     global $minimax_layout_data, $minimax_layout_settings;
-    $gs = get_post_meta(isset($_GET['post'])?$_GET['post']:'','minimax_grid_settings',true);
+    $gs = get_post_meta( isset($_GET['post']) ? $_GET['post'] : '','minimax_grid_settings', true );
     $gs = $gs[$holder."_rows"];  
-    if(is_array($minimax_layout_data)&&isset($minimax_layout_data[$holder])&&is_array($minimax_layout_data[$holder])):    
-    foreach($minimax_layout_data[$holder] as $id=>$layout):
-    echo '<li id="row_li_'.$id.'"><input id="row_settings_'.$id.'" type="hidden" name="layout_settings['.$holder.']['.$layout.']['.$id.']" value="'.$minimax_layout_settings[$holder][$layout][$id].'" /><div class="row-handler"><div class="sort"></div><div rel="row_li_'.$id.'" class="rdel delete dtooltip" title="Delete this Row?"></div><div  rel="row_settings_'.$id.'" class="rsettings dtooltip" title="Row CSS Settings"></div><div class="rclone dtooltip" title="Clone this Row" rel="row_li_'.$id.'" rthis="'.$id.'"></div></div><div class="row-container"><div class="container_12 clearfix wrapper row" id="row_'.$id.'"><input type="hidden" name="layouts['.$holder.']['.$id.']" value="'.$layout.'" />';    
-    if(!isset($gs[$id]))
-    include(MX_THEME_DIR."/frames/{$layout}.frame.php");
-    else  {
-        $cols = count($gs[$id]);
-        include(MX_THEME_DIR."/frames/dynamic.frame.php");
+    if( is_array($minimax_layout_data) && isset($minimax_layout_data[$holder]) && is_array($minimax_layout_data[$holder]) ):
+        foreach( $minimax_layout_data[$holder] as $id => $layout ):
+            echo '<li id="row_li_'.$id.'">
+                    <input id="row_settings_'.$id.'" type="hidden" name="layout_settings['.$holder.']['.$layout.']['.$id.']" value="'.$minimax_layout_settings[$holder][$layout][$id].'" />
+                    <div class="row-handler">
+                        <div class="sort dtooltip" title="Drag this row"><span class="minimax-icons minimax-move"></span></div>
+                        <div rel="row_li_'.$id.'" class="rdel delete dtooltip" title="Delete this Row ?"><span class="minimax-icons minimax-cross"></span></div>
+                        <div  rel="row_settings_'.$id.'" class="rsettings dtooltip" title="Row CSS Settings"><span class="minimax-icons minimax-cog"></span></div>
+                        <div class="rclone dtooltip" title="Clone this Row" rel="row_li_'.$id.'" rthis="'.$id.'"><span class="minimax-icons minimax-clone"></span></div>
+                    </div>
+                    <div class="row-container">
+                        <div class="container_12 clearfix wrapper row" id="row_'.$id.'">
+                            <input type="hidden" name="layouts['.$holder.']['.$id.']" value="'.$layout.'" />';
 
-    }
-    echo "</div></div><div class='clear'></div></li>";    
-    endforeach;
+            if(!isset($gs[$id]))
+                include(MX_THEME_DIR."/frames/{$layout}.frame.php");
+            else  {
+                $cols = count($gs[$id]);
+                include(MX_THEME_DIR."/frames/dynamic.frame.php");
+            }
+            echo "</div></div><div class='clear'></div></li>";
+        endforeach;
     endif;
-} 
+}
 
 //Render saved layout frames (site)
 function minimax_render_layout($layout, $id, $holder = '') {
     $minimax_options = get_option("wpeden_admin");
-    $gs = get_post_meta(get_the_ID(),'minimax_grid_settings',true);
-    //print_r($gs);
-    $gs = $gs[$holder."_rows"];  
+    $gs = get_post_meta(get_the_ID(), 'minimax_grid_settings', true);
+    $gs = $gs[$holder . "_rows"];
+    $container_css = "row";
 
-    $container_css = "row" ;
-    $layout_folder = "bootstrap";
+    global $minimax_layout_data, $minimax_layout_settings;
+    if (!$minimax_layout_settings) $minimax_layout_settings = get_option('minimax_layout_settings', array());
+    if (in_array($holder, get_post_types())) {
+        $minimax_page_layout_settings = get_post_meta(get_the_ID(), 'minimax_layout_settings', true);
+        $ls = unserialize(base64_decode($minimax_page_layout_settings[$holder][$layout][$id]));
 
-    global $minimax_layout_data, $minimax_layout_settings;  
-    if(!$minimax_layout_settings) $minimax_layout_settings = get_option('minimax_layout_settings',array());    
-    if(in_array($holder, get_post_types())){
-    $minimax_page_layout_settings = get_post_meta(get_the_ID(),'minimax_layout_settings',true);
-    $ls  = unserialize(base64_decode($minimax_page_layout_settings[$holder][$layout][$id]));
-
+        // Row Settings data
+        $mls = $minimax_page_layout_settings[$holder][$layout][$id];
     } else {
-    $ls  = unserialize(base64_decode($minimax_layout_settings[$holder][$layout][$id]));
+        $ls = unserialize(base64_decode($minimax_layout_settings[$holder][$layout][$id]));
 
+        // Row Settings data
+        $mls = '';
     }
-    $row_style  = $ls['bg_color'] ? "background:".$ls['bg_color'].";" : "";
-    $row_style .= $ls['tx_color'] ? "color:".$ls['tx_color'].";" : "";
-    $row_style .= $ls['border_color'] ? "border-top:".$ls['border_top']."px solid ".$ls['border_color'].";" : "";
-    $row_style .= $ls['border_color'] ? "border-right:".$ls['border_right']."px solid ".$ls['border_color'].";" : "";
-    $row_style .= $ls['border_color'] ? "border-bottom:".$ls['border_bottom']."px solid ".$ls['border_color'].";" : "";
-    $row_style .= $ls['border_color'] ? "border-left:".$ls['border_left']."px solid ".$ls['border_color'].";" : "";    
-    $row_style .= "margin:".$ls['margin_top']."px ".$ls['margin_right']."px ".$ls['margin_bottom']."px ".$ls['margin_left']."px;" ;
-    $row_style .= "padding:".$ls['padding_top']."px ".$ls['padding_right']."px ".$ls['padding_bottom']."px ".$ls['padding_left']."px;" ;
-    
-    if(count($minimax_layout_settings)==0 || !is_array($minimax_layout_settings)) $mls = "";
-    else $mls =  $minimax_layout_settings[$holder][$layout][$id];
-    $rid = $ls['css_id']?$ls['css_id']:"row_{$id}";
-    
+    $row_style = '';
+
+    // Row Borders
+    if (isset($ls['border_color']) && $ls['border_color'] != ''):
+        $row_style .= (isset($ls['border_top']) && $ls['border_top'] != '') ? "border-top:" . $ls['border_top'] . "px solid " . $ls['border_color'] . ";" : "";
+        $row_style .= (isset($ls['border_right']) && $ls['border_right'] != '') ? "border-right:" . $ls['border_right'] . "px solid " . $ls['border_color'] . ";" : "";
+        $row_style .= (isset($ls['border_bottom']) && $ls['border_bottom'] != '') ? "border-bottom:" . $ls['border_bottom'] . "px solid " . $ls['border_color'] . ";" : "";
+        $row_style .= (isset($ls['border_left']) && $ls['border_left'] != '') ? "border-left:" . $ls['border_left'] . "px solid " . $ls['border_color'] . ";" : "";
+    endif;
+
+    // Row Margins
+    $row_style .= (isset($ls['margin_top']) && $ls['margin_top'] != '') ? "margin-top:" . $ls['margin_top'] . "px; " : '';
+    $row_style .= (isset($ls['margin_right']) && $ls['margin_right'] != '') ? "margin-right:" . $ls['margin_right'] . "px; " : '';
+    $row_style .= (isset($ls['margin_bottom']) && $ls['margin_bottom'] != '') ? "margin-bottom:" . $ls['margin_bottom'] . "px; " : '';
+    $row_style .= (isset($ls['margin_left']) && $ls['margin_left'] != '') ? "margin-left:" . $ls['margin_left'] . "px; " : '';
+
+    // Row Paddings
+    $row_style .= (isset($ls['padding_top']) && $ls['padding_top'] != '') ? "padding-top:" . $ls['padding_top'] . "px; " : '';
+    $row_style .= (isset($ls['padding_right']) && $ls['padding_right'] != '') ? "padding-right:" . $ls['padding_right'] . "px; " : '';
+    $row_style .= (isset($ls['padding_bottom']) && $ls['padding_bottom'] != '') ? "padding-bottom:" . $ls['padding_bottom'] . "px; " : '';
+    $row_style .= (isset($ls['padding_left']) && $ls['padding_left'] != '') ? "padding-left:" . $ls['padding_left'] . "px; " : '';
+
+    $row_style .= 'position: relative;';
+
+    $row_style .= ( isset($ls['bg_color']) && $ls['bg_color'] != '') ? "background:" . $ls['bg_color'] . ";" : "";
+    $row_style .= ( isset($ls['tx_color']) && $ls['tx_color'] != '') ? "color:" . $ls['tx_color'] . ";" : "";
+
+    // BG Image Styles
+    if (isset($ls['image']) && $ls['image'] != '') {
+        $row_style .= ( isset($ls['bg_color']) && $ls['bg_color'] != '') ?  "background: {$ls['bg_color']} url(" . $ls['image'] . ");" : "background: url(" . $ls['image'] . ");";
+        $row_style .= ( $ls['repeat'] == 'stretched' ) ? "background-size:100% auto;" : "";
+        $row_style .= ( $ls['repeat'] && $ls['repeat'] != 'stretched' ) ? "background-repeat:" . $ls['repeat'] . ";" : "";
+        $row_style .= $ls['attachment'] ? "background-attachment:" . $ls['attachment'] . ";" : "";
+        $row_style .= $ls['position_h'] ? "background-position:" . $ls['position_h'] . " " . $ls['position_v'] . ";" : "";
+    }
+
+    // Row Settings data
+    //if (count($minimax_layout_settings) == 0 || !is_array($minimax_layout_settings)) $mls = "";
+    //else $mls = $minimax_layout_settings[$holder][$layout][$id];
+
     $preh = $posh = "";
+    $rid = (isset($ls['css_id']) && $ls['css_id'] != '') ? $ls['css_id'] : "row_{$id}";
 
-    if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==1 && (is_page()||is_single())){
-        echo '<li id="row_li_'.$id.'"><input class="mx-input" id="row_settings_'.$id.'" type="hidden" name="layout_settings['.$holder.']['.$layout.']['.$id.']" value="'.$mls.'" />
-        <div class="row-handler"><div class="sort dtooltip" title="Drag this row"><i class="fa fa-arrows"></i></div><div rel="row_li_'.$id.'" class="rdel delete dtooltip" title="Delete this Row ?"><i class="fa fa-trash-o"></i></div><div  rel="row_settings_'.$id.'" class="rsettings dtooltip" title="Row CSS Settings"><i class="fa fa-cog"></i></div><div class="rclone dtooltip" title="Clone this Row" rel="row_li_'.$id.'" rthis="'.$id.'"><i class="fa fa-copy"></i></div></div>
-        <div class="row-container"><input  class="mx-input" type="hidden" name="layouts['.$holder.']['.$id.']" value="'.$layout.'" />';    
+    if( isset($ls['row_style']) && $ls['row_style'] != 'default' ) {
+        $full_width_classes = $ls['row_style'] == 'fwr' ? ' mx-fullwidth-row ' : ' mx-fullwidth-row mx-fullwidth-content ';
+    }else{
+        $full_width_classes = '';
     }
-    echo '<div class="minimax_content_area row '.$ls['css_class'].'" id="'.$rid.'" style="'.$row_style.'" >'.$preh;
+
+    if (current_user_can('edit_posts') && get_option('minimax_frontend_editing', 0) == 1 && (is_page() || is_single())) {
+
+        echo '<li id="row_li_' . $id . '">
+                <input class="mx-input" id="row_settings_' . $id . '" type="hidden" name="layout_settings[' . $holder . '][' . $layout . '][' . $id . ']" value="' . $mls . '" />
+                <div class="row-handler">
+                    <div class="sort dtooltip" title="Drag this row"><i class="fa fa-arrows"></i></div>
+                    <div rel="row_li_' . $id . '" class="rdel delete dtooltip" title="Delete this Row ?"><i class="fa fa-trash-o"></i></div>
+                    <div rel="row_settings_' . $id . '" class="rsettings dtooltip" title="Row CSS Settings"><i class="fa fa-cog"></i></div>
+                    <div class="rclone dtooltip" title="Clone this Row" rel="row_li_' . $id . '" rthis="' . $id . '"><i class="fa fa-copy"></i></div>
+                </div>
+                <div class="row-container"><input  class="mx-input" type="hidden" name="layouts[' . $holder . '][' . $id . ']" value="' . $layout . '" />';
+    }
+
+    echo '<div class="minimax_content_area row ' . $ls['css_class'] . $full_width_classes . '" id="' . $rid . '" style="' . $row_style . '" >' . $preh;
 
     $cols = count($gs[$id]);
-    include(MX_THEME_DIR."/layouts/{$layout_folder}/dynamic.layout.php");
-        
+    include(MX_THEME_DIR . "/layouts/bootstrap/dynamic.layout.php");
     echo "<div style='clear: both;'></div>{$posh}</div>";
-    if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==1 && (is_page()||is_single()))
-    echo "</div><div class='clear'></div></li>";
 
+    if (current_user_can('edit_posts') && get_option('minimax_frontend_editing', 0) == 1 && (is_page() || is_single())) {
+        echo "</div><div class='clear'></div></li>";
+    }
+}
 
+function wpeden_hex2rgb($hex) {
+    $hex = str_replace("#", "", $hex);
+    $color = array();
+     
+    if(strlen($hex) == 3) {
+    $color['r'] = hexdec(substr($hex, 0, 1) . $r);
+    $color['g'] = hexdec(substr($hex, 1, 1) . $g);
+    $color['b'] = hexdec(substr($hex, 2, 1) . $b);
+    }
+    else if(strlen($hex) == 6) {
+    $color['r'] = hexdec(substr($hex, 0, 2));
+    $color['g'] = hexdec(substr($hex, 2, 2));
+    $color['b'] = hexdec(substr($hex, 4, 2));
+    }
+     
+    return $color['r'].",".$color['g'].",".$color['b'];
 }
 
 
 //Render Module Frames (admin)
-function minimax_render_module_frames($id){
+function minimax_render_module_frames( $id ){
     global $mxwidgets, $minimax_modules, $minimax_modules_settings;
     $base_theme_url = base_theme_url;
     $minimax_modules_settings = get_option('minimax_modules_settings',array());    
@@ -251,65 +371,73 @@ function minimax_render_module_frames($id){
    
     $module_frames = '';
     if(isset($minimax_modules[$id])&&is_array($minimax_modules[$id])):
-    $z = 0;
-    foreach($minimax_modules[$id] as $mid => $module):
-    $mod = $mxwidgets[$module];    
-    $z++;
-    $ms = $z-1;
+        $z = 0;
+        foreach($minimax_modules[$id] as $mid => $module):
+            $mod = $mxwidgets[$module];
+            $z++;
+            $ms = $z-1;
 
-    // Generate module preview
+            // Generate module preview
+            $instance = @unserialize(base64_decode($minimax_modules_settings[$id][$mid]));
 
-    $instance = @unserialize(base64_decode($minimax_modules_settings[$id][$mid]));
-    
-    //print_r($instance);
-    
-    $instance = @array_shift(array_shift($instance));
-    if($instance):
-       foreach($instance as $k => $v):
-          $ins[$k] = is_array($v) ? $v : stripslashes($v);
-       endforeach;
-    endif;
+            $instance = @array_shift(array_shift($instance));
+            if($instance):
+                foreach($instance as $k => $v):
+                    $ins[$k] = is_array($v) ? $v : stripslashes($v);
+                endforeach;
+            endif;
 
-    $prevw  = "";
+            $prevw  = "";
 
-    if(get_option('minimax_module_preview',0)==1){
-    ob_start();
+            if(get_option('minimax_module_preview',0)==1){
+                ob_start();
 
-    if(method_exists($pmod = new $module(),'preview'))
-        $pmod->preview($ins);
-    else
-        $pmod->widget(array(), $ins);
+                if(method_exists($pmod = new $module(),'preview'))
+                    $pmod->preview($ins);
+                else
+                    $pmod->widget(array(), $ins);
         
-    $prevw = ob_get_contents();
-    ob_clean();
+                $prevw = ob_get_contents();
+                ob_clean();
 
-    // Get preview html
-    $prevw = "<div class='module-preview w3eden'> {$prevw} </div>";
-
-    }
+                // Get preview html
+                $prevw = "<div class='before-preview'></div><div class='module-preview w3eden'> {$prevw} </div>";
+            }
     
-    $cls = (!is_admin())?' class="mx-input"':'';
+            $cls = (!is_admin())?' class="mx-input"':'';
     
-    $module_frames .=<<<MOD
+            $module_frames .=<<<MOD
+            <li id='module_{$id}_{$z}' class='mod-single' rel='{$id}'>
+                <input $cls type="hidden" id="modid_module_{$id}_{$z}" name="modules[{$id}][]" value="{$module}" />
+                <input $cls id="modset_module_{$id}_{$z}" type="hidden" name="modules_settings[{$id}][]" value="{$minimax_modules_settings[$id][$mid]}" />
 
-    <li id='module_{$id}_{$z}' rel='{$id}'>
-        <input $cls type="hidden" id="modid_module_{$id}_{$z}" name="modules[{$id}][]" value="{$module}" />
-        <input $cls id="modset_module_{$id}_{$z}" type="hidden" name="modules_settings[{$id}][]" value="{$minimax_modules_settings[$id][$mid]}" />
-        <h3><nobr class="title">{$mod->name}</nobr><nobr class="ctl"><span class="handle dtooltip" title="Drag and Drop"></span><img src="{$base_theme_url}/images/delete.png" class='delete_module dtooltip' title='Delete module?' rel='#module_{$id}_{$z}' />&nbsp;<img class="insert dtooltip" title="Module Settings" wname="{$mod->name}" id="modset_module_{$id}_{$z}_icon" rel="$module" data="{$id}|{$mid}" datafield="modset_module_{$id}_{$z}" src="{$base_theme_url}/images/settings.png" /> <img class="module-clone dtooltip" title="Clone this module" col_id = {$id} mod_name="{$mod->name}" mod_id={$module} mod_set= {$minimax_modules_settings[$id][$mid]} src="{$base_theme_url}/images/copy.png" /></nobr></h3>
-        {$prevw}
-        <div class="clear"</div>
-    </li>
+                <span class="module-title">{$mod->name}</span>
+                <div class="ctl">
+                    <div class="handle dtooltip" title="Drag this module"><span class="minimax-icons minimax-move"></span></div>
+                    <div class="delete_module dtooltip" title="Delete this module ?" rel="#module_{$id}_{$z}"><span class="minimax-icons minimax-cross"></span></div>
+                    <div class="insert dtooltip" title="Module Settings" wname="{$mod->name}" id="modset_module_{$id}_{$z}_icon" rel="$module" data="{$id}|{$mid}" datafield="modset_module_{$id}_{$z}">
+                        <span class="minimax-icons minimax-cog"></span>
+                    </div>
+                    <div class="module-clone dtooltip" title="Clone this module" rel="module_{$id}_{$z}" col_id = {$id} mod_name="{$mod->name}" mod_id={$module} mod_set= {$minimax_modules_settings[$id][$mid]}>
+                        <span class="minimax-icons minimax-clone"></span>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                {$prevw}
+                <div class="clear"></div>
+            </li>
 MOD;
 
     endforeach;
     endif;
     echo $module_frames;
-    
 }
 
 function minimax_get_module_preview(){
     //global $mxwidgets, $minimax_modules, $minimax_modules_settings;
-    if(get_option('minimax_module_preview',0)==0 && !isset($_REQUEST['front'])) die("");
+
+    if( get_option('minimax_module_preview',0) == 0 && !isset($_REQUEST['front'])) die("");
+
     $instance = @unserialize(base64_decode($_POST['modinfo']));
     $instance = @array_shift(array_shift($instance));
     if($instance):
@@ -331,59 +459,90 @@ function minimax_render_modules($id){
     global $minimax_modules, $mxwidgets, $wp_widget_factory, $minimax_modules_settings, $minimax_layout_data;
           
     if(get_post_meta(get_the_ID(),'minimax_modules',true)){           
-    $minimax_layout_data_page = get_post_meta(get_the_ID(),'minimax_layout',true);
-    $postmod = get_post_meta(get_the_ID(),'minimax_modules',true);
-    $postmodset = get_post_meta(get_the_ID(),'minimax_modules_settings',true);    
-    if(!is_array($minimax_modules)) $minimax_modules = array();
-    if(!is_array($minimax_modules_settings)) $minimax_modules_settings = array();
-    if(!is_array($postmod)) $postmod = array();
-    if(!is_array($postmodset)) $postmodset = array();
-    $minimax_modules += $postmod;              
-    $minimax_modules_settings += $postmodset;
+        $minimax_layout_data_page = get_post_meta(get_the_ID(),'minimax_layout',true);
+        $postmod = get_post_meta(get_the_ID(),'minimax_modules',true);
+        $postmodset = get_post_meta(get_the_ID(),'minimax_modules_settings',true);
+        if(!is_array($minimax_modules)) $minimax_modules = array();
+        if(!is_array($minimax_modules_settings)) $minimax_modules_settings = array();
+        if(!is_array($postmod)) $postmod = array();
+        if(!is_array($postmodset)) $postmodset = array();
+        $minimax_modules += $postmod;
+        $minimax_modules_settings += $postmodset;
     }
+
     $base_theme_url = base_theme_url;
+
     if($minimax_modules[$id]):
+
     $mcount = 0;
     $z = 0;
-    foreach($minimax_modules[$id] as $index=>$module):
+    foreach($minimax_modules[$id] as $index => $module):
         $z++;
         $mod = $mxwidgets[$module];
         $instance = @unserialize(base64_decode($minimax_modules_settings[$id][$index]));
-        
+
         //Get extra styling data
-        $ms = $instance[ms];
-        $mod_style  = $ms['bg_color'] ? "background:".$ms['bg_color'].";" : "";
-        $mod_style .= $ms['tx_color'] ? "color:".$ms['tx_color'].";" : "";
-        $mod_style .= $ms['border_color'] ? "border-top:".$ms['border_top']."px solid ".$ms['border_color'].";" : "";
-        $mod_style .= $ms['border_color'] ? "border-right:".$ms['border_right']."px solid ".$ms['border_color'].";" : "";
-        $mod_style .= $ms['border_color'] ? "border-bottom:".$ms['border_bottom']."px solid ".$ms['border_color'].";" : "";
-        $mod_style .= $ms['border_color'] ? "border-left:".$ms['border_left']."px solid ".$ms['border_color'].";" : "";    
-        $mod_style .= "margin:".$ms['margin_top']."px ".$ms['margin_right']."px ".$ms['margin_bottom']."px ".$ms['margin_left']."px;" ;
-        $mod_style .= "padding:".$ms['padding_top']."px ".$ms['padding_right']."px ".$ms['padding_bottom']."px ".$ms['padding_left']."px;" ;
-        $mod_class  = $ms['css_class'];
+        $ms = $instance['ms'];
+
+        $mod_style = '';
+        $mod_style .= ( isset($ms['bg_color']) && $ms['bg_color'] != '' ) ? "background:".$ms['bg_color'].";" : "";
+        $mod_style .= ( isset($ms['tx_color']) && $ms['tx_color'] != '' ) ? "color:".$ms['tx_color'].";" : "";
+
+        // Module Borders
+        if (isset($ms['border_color']) && $ms['border_color'] != ''):
+            $mod_style .= (isset($ms['border_top']) && $ms['border_top'] != '') ? "border-top:" . $ms['border_top'] . "px solid " . $ms['border_color'] . ";" : "";
+            $mod_style .= (isset($ms['border_right']) && $ms['border_right'] != '') ? "border-right:" . $ms['border_right'] . "px solid " . $ms['border_color'] . ";" : "";
+            $mod_style .= (isset($ms['border_bottom']) && $ms['border_bottom'] != '') ? "border-bottom:" . $ms['border_bottom'] . "px solid " . $ms['border_color'] . ";" : "";
+            $mod_style .= (isset($ms['border_left']) && $ms['border_left'] != '') ? "border-left:" . $ms['border_left'] . "px solid " . $ms['border_color'] . ";" : "";
+        endif;
+
+        // Module Margins
+        $mod_style .= (isset($ms['margin_top']) && $ms['margin_top'] != '') ? "margin-top:" . $ms['margin_top'] . "px; " : '';
+        $mod_style .= (isset($ms['margin_right']) && $ms['margin_right'] != '') ? "margin-right:" . $ms['margin_right'] . "px; " : '';
+        $mod_style .= (isset($ms['margin_bottom']) && $ms['margin_bottom'] != '') ? "margin-bottom:" . $ms['margin_bottom'] . "px; " : '';
+        $mod_style .= (isset($ms['margin_left']) && $ms['margin_left'] != '') ? "margin-left:" . $ms['margin_left'] . "px; " : '';
+
+        // Module Paddings
+        $mod_style .= (isset($ms['padding_top']) && $ms['padding_top'] != '') ? "padding-top:" . $ms['padding_top'] . "px; " : '';
+        $mod_style .= (isset($ms['padding_right']) && $ms['padding_right'] != '') ? "padding-right:" . $ms['padding_right'] . "px; " : '';
+        $mod_style .= (isset($ms['padding_bottom']) && $ms['padding_bottom'] != '') ? "padding-bottom:" . $ms['padding_bottom'] . "px; " : '';
+        $mod_style .= (isset($ms['padding_left']) && $ms['padding_left'] != '') ? "padding-left:" . $ms['padding_left'] . "px; " : '';
+
+
+        $mod_class  = (isset($ms['css_class']) && $ms['css_class'] != '') ? $ms['css_class'] : '';
+        $animation = (isset($ms['animation']) && $ms['animation'] != '') ? $ms['animation'] : "";
 
         //Get general module options
-        $instance = @array_shift(array_shift($instance));     
+        $instance = @array_shift(array_shift($instance));
+
         if($instance):
             foreach($instance as $k=>$v):
             $ins[$k] = is_array($v)?$v:stripslashes($v);
-            endforeach; 
+            endforeach;
         endif;
 
-        
-    if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==1 && (is_page()||is_single())){
+
+    if( current_user_can('edit_posts') && get_option( 'minimax_frontend_editing', 0 ) == 1 && ( is_page() || is_single() ) ) {
     echo "<li id='module_{$id}_{$z}' class='minimax_module $module'  rel='{$id}'>";
+    echo "<div class='mx-md-overlay'></div>";
     echo <<<HFL
         <input class="mx-input" type="hidden" id="modid_module_{$id}_{$z}" name="modules[{$id}][]" value="{$module}" />
         <input class="mx-input" id="modset_module_{$id}_{$z}" type="hidden" name="modules_settings[{$id}][]" value="{$minimax_modules_settings[$id][$index]}" />
-        <div class="mod-ctrl">{$mod->name}<nobr class="ctl"><i class="handle icon icon-move dtooltip" title="Drag this module"></i><i class='delete_module icon icon-trash dtooltip' title='Delete this module?' rel='#module_{$id}_{$z}'></i><i class="insert icon icon-cog dtooltip" title="Module settings" wname="{$mod->name}" id="modset_module_{$id}_{$z}_icon" rel="$module" data="{$id}|{$mid}" datafield="modset_module_{$id}_{$z}"></i><i class="module-clone icon icon-copy dtooltip" title="Clone this module" col_id = "module_{$id}_{$z}" mod_name="{$mod->name}" mod_id={$module}></i></nobr></div>
-        <div class='minimax_module $module $mod_class' style='$mod_style' data-wow-duration='1s' data-wow-delay='1s'>
+        <div class="mod-ctrl">{$mod->name}
+        <nobr class="ctl">
+            <i class="handle icon icon-move dtooltip" title="Drag this module"></i>
+            <i class='delete_module icon icon-trash dtooltip' title='Delete this module?' rel='#module_{$id}_{$z}'></i>
+            <i class="insert icon icon-cog dtooltip" title="Module settings" wname="{$mod->name}" id="modset_module_{$id}_{$z}_icon" rel="$module" data="{$id}|{$index}" datafield="modset_module_{$id}_{$z}"></i>
+            <i class="module-clone icon icon-copy dtooltip" title="Clone this module" col_id = "module_{$id}_{$z}" mod_name="{$mod->name}" mod_id={$module}></i>
+        </nobr>
+        </div>
+        <div class='minimax_module wow $animation $module $mod_class' style='$mod_style' data-wow-duration='1s' data-wow-delay='1s'>
 
 HFL;
     } else
-        echo "<div class='minimax_module $module $mod_class' style='$mod_style' data-wow-duration='1s' data-wow-delay='1s'>";
+        echo "<div class='minimax_module wow $animation $module $mod_class' style='$mod_style' data-wow-duration='1s' data-wow-delay='1s'>";
 
-    the_widget($module,$ins);
+    the_widget($module, $ins, $args = array('before_widget' => '<div class="%s">') );
 
     echo (current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==1 && (is_page()||is_single()))?"</div></li>":"</div>";
     $mcount++;
@@ -499,12 +658,11 @@ function minimax_module_settings_data(){
 //Raw JS Code
 function minimax_header_js(){
     ?>
-    
     <script type="text/javascript">    
       var base_theme_url = "<?php echo base_theme_url; ?>",pageid="<?php echo isset($_GET['post'])?$_GET['post']:''; ?>",post_type="<?php echo get_post_type(); ?>";
+      var mx_admin_url = "<?php echo admin_url(); ?>";
       <?php if(!is_admin()) echo "var adminurl='".admin_url('/')."', ajaxurl = adminurl+'admin-ajax.php';"; ?>
     </script>
-    
     <?php
 }
 
@@ -643,9 +801,13 @@ function minimax_new_meida_buttons(){
     $post_type = get_post_type();
     $pageid = isset($_GET['post'])?$_GET['post']:'';
     if($pageid!='')
-        $mxnb = "<a class='button export' href='".admin_url()."?minimaxexport=".$pageid."' ><span>Export Layout</span></a><a class='button import-layout import' rel='".$pageid."' href='#' ><span>Import Layout</span></a><a class='button clone' href='".admin_url()."?minimaxclone=".$pageid."' ><span>Clone</span></a>";
+        $mxnb = "<a class='button export' href='".admin_url()."?minimaxexport=".$pageid."' ><span>Export Layout</span></a>
+                 <a class='button import-layout import' rel='".$pageid."' href='#' ><span>Import Layout</span></a>
+                 <a class='button clone' href='".admin_url()."?minimaxclone=".$pageid."' ><span>Clone</span></a>";
     else
-        $mxnb = "<a class='button export' href='#' onclick='alert(\"".$post_type." is not published or saved yet!\");return false;' ><span>Export Layout</span></a><a class='button import' href='#' onclick='alert(\"".$post_type." is not published or saved yet!\");return false;' ><span>Import Layout</span></a><a class='button clone' href='#' onclick='alert(\"".$post_type." is not published or saved yet!\");return false;' ><span>Clone</span></a>";
+        $mxnb = "<a class='button export' href='#' onclick='alert(\"".$post_type." is not published or saved yet!\");return false;' ><span>Export Layout</span></a>
+                 <a class='button import' href='#' onclick='alert(\"".$post_type." is not published or saved yet!\");return false;' ><span>Import Layout</span></a>
+                 <a class='button clone' href='#' onclick='alert(\"".$post_type." is not published or saved yet!\");return false;' ><span>Clone</span></a>";
             
    echo $mxnb;
 }
@@ -653,32 +815,43 @@ function minimax_new_meida_buttons(){
 
 //Register front-end script
 function minimax_enqueue_scripts(){
-        $minimax_options = get_option("wpeden_admin");
-        wp_enqueue_script("jquery"); 
-        
-        /* Do not add bootstarp.css when using canvas, add custom bootstrap skin from canvas folder*/
-        if (get_post_meta(get_the_ID(), 'squeeze_page', true) != 1)
-        wp_enqueue_style("minimax-bootstrap",base_theme_url.'/bootstrap/css/bootstrap.css');        
-        wp_enqueue_style("module-styles",base_theme_url.'/css/module-styles.css');
-        wp_enqueue_script("bootstrap-js",base_theme_url.'/bootstrap/js/bootstrap.min.js');
-        wp_enqueue_style("row-styles",base_theme_url.'/css/row-styles.css');
+    $minimax_options = get_option("wpeden_admin");
+    wp_enqueue_script("jquery");
 
-    if(current_user_can('edit_posts') && get_option('minimax_frontend_editing',0)==1 && (is_page()||is_single())){
+    if ( get_post_meta(get_the_ID(), 'squeeze_page', true) != 1 && get_option('minimax_bootstrap_css', 1) != 0 ) {
+        wp_enqueue_style("minimax-bootstrap", base_theme_url . '/assets/bootstrap/css/bootstrap.css');
+    }
+    wp_enqueue_style("row-styles",base_theme_url.'/css/front.css');
+    wp_enqueue_style("fa", "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
+    wp_enqueue_style('font-awesome',"//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css");
+    wp_enqueue_style('minimax-icon-font', plugins_url('/page-layout-builder/assets/fonts/minimax-icons/style.css'));
+
+    if( get_option('minimax_bootstrap_js', 1) != 0 ) wp_enqueue_script("bootstrap-js",base_theme_url.'/assets/bootstrap/js/bootstrap.min.js');
+
+    wp_enqueue_style('animate',base_theme_url.'/css/animate.css');
+    wp_enqueue_script("wow",base_theme_url.'/js/wow.js');
+
+    wp_enqueue_script("minimax-front", base_theme_url . '/js/minimax-front.js');
+
+    if( current_user_can( 'edit_posts' ) && get_option( 'minimax_frontend_editing', 0 ) == 1 && ( is_page() || is_single() ) ){
+
+        //Styles
+        wp_enqueue_style('front-editor-font', '//fonts.googleapis.com/css?family=Titillium+Web');
+        wp_enqueue_style("jquery-ui-main", plugins_url('/page-layout-builder/assets/jquery-ui/jquery-ui.css'));
+        wp_enqueue_style("front-builder", base_theme_url.'/css/front-builder.css');
+        wp_enqueue_style("chosen-ui", plugins_url('/page-layout-builder/assets/chosen/chosen.min.css'));
+
+        //Scripts
         wp_enqueue_script("jquery-cookie",base_theme_url.'/js/jquery.ck.js',array('jquery'));
-        wp_enqueue_style("jquery-ui-m",plugins_url('/page-layout-builder/css/jqui/theme/jquery-ui.css'));
-        wp_enqueue_style("jquery-ui-new",plugins_url('/page-layout-builder/css/jqui/css/custom.css'));
-        wp_enqueue_style("admin-theme-style",base_theme_url.'/css/front-style.css');
         wp_enqueue_script("jqueryuiall", "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js");
         wp_enqueue_script("thickbox");
         wp_enqueue_script("jquery-form", array('jquery'));
         wp_enqueue_script("operations-js",base_theme_url.'/js/operations-front.js');
+        wp_enqueue_script('chosen-js', plugins_url('/page-layout-builder/assets/chosen/chosen.jquery.min.js'), array('jquery'));
     }
-    wp_enqueue_style("fa", "//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css");
-    wp_enqueue_style('font-awesome',"//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css");
-
 }
 
-/*Ad WP Color Picker Scripts in Front End*/
+/*Add WP Color Picker Scripts in Front End*/
 function wp_color_picker_frontend() {
     wp_enqueue_style( 'wp-color-picker' );
     wp_enqueue_script( 'iris',admin_url( 'js/iris.min.js' ),array( 'jquery-ui-draggable', 'jquery-ui-slider', 'jquery-touch-punch' ),false,1);
@@ -691,38 +864,35 @@ function wp_color_picker_frontend() {
     wp_localize_script( 'wp-color-picker', 'wpColorPickerL10n', $colorpicker_l10n ); 
 }
  
-function minimax_admin_enqueue_scripts(){      
+function minimax_admin_enqueue_scripts(){
     
     wp_enqueue_script("jquery");
      
-    //if((isset($_GET['page'])&&$_GET['page']=='minimax')||(isset($_GET['post_type'])&&$_GET['post_type']!='')||(isset($_GET['post'])&&in_array(get_post_type($_GET['post']),get_post_types()))||in_array(get_post_type(),get_post_types())){      
-    //Styles
-    if(isset($_GET['page'])&&$_GET['page']=='minimax')
-    wp_enqueue_style("admin-reset",base_theme_url.'/css/reset.css');
-    wp_enqueue_style("admin-grid",base_theme_url.'/css/grid.css');
-    wp_enqueue_style("admin-bootstrap",base_theme_url.'/bootstrap/css/bootstrap.css');
+    //Admin Styles
+    if(isset($_GET['page'])&&$_GET['page']=='minimax') wp_enqueue_style("admin-reset",base_theme_url.'/css/reset.css');
+
+    wp_enqueue_style("admin-bootstrap",base_theme_url.'/assets/bootstrap/css/bootstrap.css');
     wp_enqueue_style("admin-theme-style",base_theme_url.'/css/admin-style.css');
-    wp_enqueue_style("frame-style",base_theme_url.'/frames/css/style.css');
-    wp_enqueue_style("frame-grid",base_theme_url.'/frames/css/grid.css');
-    wp_enqueue_style("gh-buttons",base_theme_url.'/css/gh-buttons.css');        
-    wp_enqueue_style("thickbox");  
-    wp_enqueue_style("jquery-ui-main",plugins_url('/page-layout-builder/css/jqui/theme/jquery-ui.css'));
-    wp_enqueue_style("jquery-ui-new",plugins_url('/page-layout-builder/css/jqui/css/custom.css'));
-    wp_enqueue_style("wp-color-picker"); 
+    wp_enqueue_style("frame-grid",base_theme_url.'/css/grid.css');
+    wp_enqueue_style("gh-buttons",base_theme_url.'/css/gh-buttons.css');
+    wp_enqueue_style("thickbox");
+    wp_enqueue_style("jquery-ui-main",plugins_url('/page-layout-builder/assets/jquery-ui/jquery-ui.css'));
+    wp_enqueue_style("wp-color-picker");
+    wp_enqueue_style('chosen-ui',plugins_url('/page-layout-builder/assets/chosen/chosen.min.css'));
+    wp_enqueue_style('minimax-icon-font', plugins_url('/page-layout-builder/assets/fonts/minimax-icons/style.css'));
     
-    //Scripts    
+    //Admin Scripts
     wp_enqueue_script("jquery-ui-all");
     wp_enqueue_script("jquery-ui-sortable");
     wp_enqueue_script("jquery-form");
-    wp_enqueue_script("thickbox");    
+    wp_enqueue_script("thickbox");
     wp_enqueue_script("jquery-cookie",base_theme_url.'/js/jquery.ck.js',array('jquery'));
-    wp_enqueue_script("minimax-opr",base_theme_url.'/js/operations.js',array('jquery'));        
+    wp_enqueue_script("minimax-opr",base_theme_url.'/js/operations.js',array('jquery'));
     wp_enqueue_script("wp-color-picker");
     wp_enqueue_script("jquery-ui-dialog");
-    wp_enqueue_script("jquery-ui-tabs");    
-    wp_enqueue_script("bootstrap-js",base_theme_url.'/bootstrap/js/bootstrap.min.js');
-    
-    //}
+    wp_enqueue_script("jquery-ui-tabs");
+    wp_enqueue_script("bootstrap-js",base_theme_url.'/assets/bootstrap/js/bootstrap.min.js');
+    wp_enqueue_script('chosen-js', plugins_url('/page-layout-builder/assets/chosen/chosen.jquery.min.js'), array('jquery'));
 }
 
 
@@ -739,6 +909,26 @@ function minimax_dynamic_thumb($path, $size){
     return $thumbpath;
 }
 
+/*Animation library wow.js init*/
+function wow_init(){
+    ?> <script> new WOW().init(); </script> <?php
+}
+
+/* Generate cutom excerpt */
+function minimax_get_excerpt($postid, $length, $echo = true, $c = '...'){
+    $post = get_post($postid);
+    $uexcerpt = $post->post_excerpt?$post->post_excerpt:preg_replace("/\[([^\]]*)\]/","",$post->post_content);
+    $uexcerpt = strip_tags($uexcerpt);
+    $uexcerpt = esc_html($uexcerpt);
+    $excerpt = substr($uexcerpt,0,$length);
+    $eexcerpt = substr($uexcerpt,$length);
+    $eexcerpt = explode(" ",$eexcerpt);
+    $excerpt .= array_shift($eexcerpt);
+    $excerpt =  $excerpt?$excerpt.$c:$excerpt;
+    if(!$echo) return $excerpt;
+    echo $excerpt;
+}
+
 
 function minimax_cache_status(){
     update_option('minimax_cache_status', $_POST['cache_status']);
@@ -748,11 +938,17 @@ function minimax_module_preview(){
     update_option('minimax_module_preview', $_POST['module_preview']);
     die("OK");
 }
-
+function minimax_bootstrap_css(){
+    update_option('minimax_bootstrap_css', $_POST['bootstrap_status']);
+    die("OK");
+}
+function minimax_bootstrap_js(){
+    update_option('minimax_bootstrap_js', $_POST['bootstrap_status']);
+    die("OK");
+}
 
 add_action("init", "minimax_enable_frontend");
-add_action('media_buttons', 'minimax_new_meida_buttons', 99);
-//Common Actions (required for front and back)
+//add_action('media_buttons', 'minimax_new_meida_buttons', 99);
 add_action('init', 'minimax_load_theme_option_data');
 
 //Ajax Actions
@@ -771,10 +967,8 @@ add_action('admin_init', 'minimax_export_page_layout');
 add_action('admin_init', 'minimax_import_layout_data');
 add_action('admin_init', 'minimax_clone_page');
 
-
 //Register Minimax modules
-//if($_GET['page']=='minimax'||$_GET['post_type']!=''||in_array(get_post_type($_GET['post']),get_post_types())||in_array(get_post_type(),get_post_types())||!is_admin())
-    minimax_register_modules();
+minimax_register_modules();
 
 add_action('admin_head', 'minimax_header_js');
 add_action('wp_head', 'minimax_header_js');
@@ -783,13 +977,14 @@ add_action("wp_enqueue_scripts", "wp_color_picker_frontend", 100);
 add_action("wp_enqueue_scripts", "minimax_enqueue_scripts");
 add_filter("the_content", "minimax_page_layout");
 
-//Actions    
+//Actions
 add_action('init', "minimax_wp_widgets");
-add_action('init', "minimax_select_layout");
 add_action('wp_ajax_save_frontend_layout', "minimax_save_frontend_page_layout");
 add_action('wp_ajax_minimax_cache', "minimax_cache_status");
 add_action('wp_ajax_minimax_module_preview', "minimax_module_preview");
-
+add_action('wp_ajax_minimax_bootstrap_css', "minimax_bootstrap_css");
+add_action('wp_ajax_minimax_bootstrap_js', "minimax_bootstrap_js");
+add_action('wp_footer','wow_init');
 
 //Save all settings
 add_action("wp_ajax_minimax_save_theme_options", "minimax_save_theme_options");

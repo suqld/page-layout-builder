@@ -11,10 +11,13 @@
     .widget_minimax_accordion .panel .panel-heading{
         border-radius: 0px;
     }
+    .widget_minimax_accordion .panel .panel-heading a{
+        box-shadow: none;
+    }
     .widget_minimax_accordion .panel-heading a:hover,
     .widget_minimax_accordion .panel-heading a:focus{
-        text-decoration: none;
-        color: #000;
+        text-decoration: none!important;
+        outline: none!important;
     }
     .widget_minimax_accordion .panel-primary .panel-heading a{
         color: #fff;

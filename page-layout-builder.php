@@ -4,9 +4,14 @@ Plugin Name: MiniMax - Page Layout Builder
 Description: MiniMax - Drag and Drop Page Builder / Layout Builder / Content Builder for WordPress
 Plugin URI: http://wpeden.com/minimax-wordpress-page-layout-builder-plugin/
 Author: Shaon
-Version: 1.9.0
+Version: 2.0.3
 Author URI: http://wpeden.com
 */
+
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 define("MX_THEME_DIR", dirname(__FILE__));
 define("MX_PLUG_DIR", dirname(__FILE__));
@@ -29,15 +34,12 @@ if (!isset($content_width))
 include("includes/core.php");
 
 /* Theme Option Menu */
-
 function minimax_opt_menu() {
-    $iconurl = plugins_url() . '/page-layout-builder/images/menuicon.png';
-    add_menu_page("MiniMax", "MiniMax", 'administrator', 'minimax', 'minimax_options', $iconurl);
+    add_menu_page("MiniMax", "MiniMax", 'administrator', 'minimax', 'minimax_options', 'dashicons-layout');
 }
 
 /* Theme Option Function */
-
-function minimax_options() { 
+function minimax_options() {
     global $minimax_options;
     require_once("includes/theme-options.php");
 }
@@ -49,7 +51,6 @@ function minimax_squeeze_page_canvas() {
         die();
     endif;
 }
- 
 
 function minimax_module_status_change() {
     if (isset($_POST['module']) && $_POST['module']) {
@@ -61,7 +62,6 @@ function minimax_module_status_change() {
             unset($modules[$_POST['module']]);
             $stats_return = "power_off";
         }
-        //then update the settings
         update_option("minimax_allowed_modules", $modules);
         die($stats_return);
     }
@@ -73,8 +73,8 @@ function custom_init() {
         'labels' => array(
             'name' => __('Tabs'),
             'singular_name' => __('Tabs'),
-            'add_new' => __('Add Tab'),
-            'add_new_item' => __('Add New Tab'),
+            'add_new' => __('Add New'),
+            'add_new_item' => __('Add New'),
             'edit_item' => __('Edit Tab'),
             'new_item' => __('New Tab'),
             'view_item' => __('View Tab'),
@@ -91,17 +91,16 @@ function custom_init() {
         'rewrite' => array('slug' => 'minimax-tabs', 'with_front' => true),
         'capability_type' => 'post',
         'hierarchical' => false,
-        'menu_icon' => plugins_url() . '/page-layout-builder/images/tab.png',
+        'menu_icon' => 'dashicons-editor-kitchensink',
         'supports' => array('title', 'editor')
-            //'taxonomies' => array('ptype')
-            )
+        )
     );
     register_post_type("minimax_accordion", array(
         'labels' => array(
-            'name' => __('Accordion'),
+            'name' => __('Accordions'),
             'singular_name' => __('Accordion'),
-            'add_new' => __('Add Accordion'),
-            'add_new_item' => __('Add New Accordion'),
+            'add_new' => __('Add New'),
+            'add_new_item' => __('Add New'),
             'edit_item' => __('Edit Accordion'),
             'new_item' => __('New Accordion'),
             'view_item' => __('View Accordion'),
@@ -118,9 +117,8 @@ function custom_init() {
         'rewrite' => array('slug' => 'minimax-accordion', 'with_front' => true),
         'capability_type' => 'post',
         'hierarchical' => false,
-        'menu_icon' => plugins_url() . '/page-layout-builder/images/accordion.png',
+        'menu_icon' => 'dashicons-menu',
         'supports' => array('title', 'editor')
-        //'taxonomies' => array('ptype')
         )
     );
 }
@@ -130,9 +128,8 @@ function minimax_add_custom_box() {
 }
 
 function minimax_slider_link($post) {
-    global $pt_plugin;
     ?>
-<input type="text" width="100%" name="minimax_slider_link" value="<?php echo get_post_meta($post->ID, "minimax_slider_link", true); ?>">
+    <input type="text" class="widefat" name="minimax_slider_link" value="<?php echo get_post_meta($post->ID, "minimax_slider_link", true); ?>">
     <?php
 }
 
@@ -172,47 +169,40 @@ function minimax_module_update_checker() {
     die();
 }
 
-function minimax_update_module() {
-
-    wp_filesystem();
-    global $wp_filesystem;
-    $module = $_POST['module'] . '.zip';
-    $dirname = explode(".v.", $_POST['module']);
-    $dirname = $dirname[0];
-    $res = wp_remote_post("http://localhost/minimax-server/index.php", array(
-        'method' => 'POST',
-        'timeout' => 45,
-        'redirection' => 5,
-        'httpversion' => '1.0',
-        'blocking' => true,
-        'headers' => array(),
-        'body' => array('task' => 'updatenow', 'module' => $module),
-        'cookies' => array()
-    ));
-
-    $tmpfile = str_replace("\\", "/", dirname(__FILE__)) . '/cache/' . $module;
-    file_put_contents($tmpfile, wp_remote_retrieve_body($res));
-    rename(dirname(__FILE__) . '/modules/' . $dirname, dirname(__FILE__) . '/archive/' . $dirname . "_old");
-    $ret = unzip_file($tmpfile, dirname(__FILE__) . '/modules');
-
-    die();
+// add a link to the WP Toolbar
+function activate_front_editor($wp_admin_bar) {
+        if(is_admin()) return;
+	$args = array(
+		'id' => 'minimax_admin_toolbar',
+		'title' => 'Edit With MiniMax', 
+		'href' => home_url('/?mxfrontend=1'), 
+		'meta' => array(
+			'class' => 'minimax_admin_toolbar', 
+			'title' => 'Edit With MiniMax'
+			)
+	);
+	$wp_admin_bar->add_node($args);
 }
+//add_action('admin_bar_menu', 'activate_front_editor', 999);
 
 function minimax_add_settings_link( $links ) {
     $settings_link = '<a href="admin.php?page=minimax">' . __( 'Settings' ) . '</a>';
     array_push( $links, $settings_link );
-  	return $links;
+    $support_link = '<a target="_blank" href="http://wpeden.com/forums/forum/plugin-support/minimax/">' . __( 'Support Forum' ) . '</a>';
+    array_push( $links, $support_link );
+    
+    return $links;
 }
 $pbn = plugin_basename( __FILE__ );
 add_filter( "plugin_action_links_$pbn", 'minimax_add_settings_link' );
 
-add_action('add_meta_boxes', 'minimax_add_custom_box');
+
+//add_action('add_meta_boxes', 'minimax_add_custom_box');
 add_action('save_post', 'minimax_save_link');
- 
+
 add_action('init', 'custom_init');
 
 add_action('admin_menu', 'minimax_opt_menu');
 add_action('template_redirect', 'minimax_squeeze_page_canvas');
 add_action('wp_ajax_module_status_change', 'minimax_module_status_change');
 add_action('wp_ajax_check_module_update', 'minimax_module_update_checker');
-add_action('wp_ajax_update_module', 'minimax_update_module');

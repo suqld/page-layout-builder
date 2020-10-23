@@ -10,7 +10,7 @@ Author URI: #
 class MiniMax_subpage extends WP_Widget {
     /** constructor */
     function __construct() {
-        parent::WP_Widget( /* Base ID */'minimax_subpage', /* Name */'Subpages', array( 'description' => 'List Sub-Pages' ) );
+        parent::__construct( /* Base ID */'minimax_subpage', /* Name */'Subpages', array( 'description' => 'List Sub-Pages' ) );
     }
 
     /** @see WP_Widget::widget */
@@ -24,9 +24,18 @@ class MiniMax_subpage extends WP_Widget {
         echo $before_widget;
         if ( !empty( $title ) ) { echo $before_title . $title . $after_title; } 
         
-        if(empty($pageid))$pageid=get_the_ID();
+        if(empty($pageid))$pageid = get_the_ID();
         ?>
-        <style type="text/css">.widget_minimax_subpage ul li{list-style:none;}.page-list-<?php echo $xid; ?> li{ list-style:none;padding:0px;margin:0px;padding-left: 20px; background: url('<?php echo base_theme_url.'/modules/subpages/icons/'.$sicon; ?>') left center no-repeat; line-height: 22px; }</style>
+        <style type="text/css">
+            ul.page-list-<?php echo $xid; ?> li{
+                list-style:none;
+                padding:0px;
+                margin:0px;
+                padding-left: 20px; 
+                background: url('<?php echo base_theme_url.'/modules/subpages/icons/'.$sicon; ?>') left center no-repeat; 
+                line-height: 22px; 
+            }
+        </style>
         <ul class="page-list-<?php echo $xid; ?>">
         <?php wp_list_pages("title_li=&child_of=$pageid&show_date=modified&date_format=$date_format"); ?>
         </ul>
@@ -47,13 +56,8 @@ class MiniMax_subpage extends WP_Widget {
         if ( $instance ) {
             $title =  $instance['title'];
             $pageid =  $instance['pageid'];
-            $sicon = $instance['sicon'];
-            
+            $sicon = $instance['sicon'];            
         }
-        else {
-           
-        }
-        //print_r($instance['content']);
         ?>
         <style type="text/css">.icon { cursor: pointer; padding:5px; margin: 5px; border: 1px solid transparent; }.selected{border:1px solid #E77825;background:#FFC7A0;}</style>
         <p>
@@ -78,7 +82,6 @@ class MiniMax_subpage extends WP_Widget {
         <input type="hidden" id="<?php echo $this->get_field_id('sicon'); ?>" name="<?php echo $this->get_field_name('sicon'); ?>" value="<?php echo $sicon; ?>" />
         </p> 
         <script language="JavaScript">
-        <!--
           jQuery(function(){
               jQuery('img.icon').unbind('click');
               jQuery('img.icon').click(function(){
@@ -88,7 +91,6 @@ class MiniMax_subpage extends WP_Widget {
               });
               
           });
-        //-->
         </script>    
         <?php 
     }
