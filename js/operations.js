@@ -55,11 +55,11 @@ jQuery(function(){
         reset_layout_width();
     });
 
-    jQuery('.module-preview.w3eden *').live('click',function(e){
+    jQuery('.module-preview.w3eden *').on('click',function(e){
         e.preventDefault();
     });
 
-    jQuery('.mwdth').live('click', function () {
+    jQuery('.mwdth').on('click', function () {
         var prts = this.id.split("_");
         var grid = jQuery('#' + prts[1] + '_' + prts[2]).val();
         var tgrid = grid;
@@ -94,7 +94,7 @@ jQuery(function(){
 
     jQuery('.admin-cont').css('min-height', (jQuery('body').height() - 120) + 'px');
 
-    jQuery('.insert-layout').live('click', function () {
+    jQuery('.insert-layout').on('click', function () {
         if (holder == '') {
             holder = jQuery(this).attr('holder') + " .layout-data";
             holder_id = jQuery(this).attr('holder').replace("#layout_", "");
@@ -116,7 +116,7 @@ jQuery(function(){
 
     //Layout Settings
     var layout_settings_id = "", layout_settings_data = "";
-    jQuery('.rsettings').live('click', function () {
+    jQuery('.rsettings').on('click', function () {
         layout_settings_id = jQuery(this).attr('rel');
         layout_settings_data = jQuery('#' + layout_settings_id).val();
         jQuery("#dialog").dialog('option', 'title', 'Row Settings');
@@ -130,7 +130,7 @@ jQuery(function(){
     });
 
     //Delete Layout
-    jQuery('.rdel').live('click', function () {
+    jQuery('.rdel').on('click', function () {
         jQuery(this).after("<div class='besure' style='display:none;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:99999999;position:absolute;color:#000;border:5px solid rgba(0,0,0,0.4);'><div style='padding:10px;background:#fff;font-family:verdana;font-size:10px'>Are you sure? <a style='-webkit-border-radius: 15px;-moz-border-radius: 15px;border-radius: 15px;background:#800;padding:4px 8px 6px 8px;color:#fff;text-decoration:none;' href='#' onclick='jQuery(\".besure\").fadeOut(function(){jQuery(this).remove();jQuery(\"#" + jQuery(this).attr("rel") + "\").slideUp(function(){jQuery(this).remove();});});return false;'>y</a> <a href='' style='-webkit-border-radius: 15px;-moz-border-radius: 15px;border-radius: 15px;background:#080;padding:4px 8px 6px 8px;color:#fff;text-decoration:none;' onclick='jQuery(\".besure\").fadeOut(function(){jQuery(this).remove();mxdm=null;});return false;'>n</a></div></div>");
         jQuery('.besure').fadeIn();
     });
@@ -138,7 +138,7 @@ jQuery(function(){
 
     //Select Module
     var insertto = "", module_index = "", msf_mid = "", msf_title = "";
-    jQuery('.btnAddMoudule').live('click', function () {
+    jQuery('.btnAddMoudule').on('click', function () {
         insertto = '#' + this.rel + ' .module';
         module_index = this.rel;
 
@@ -171,7 +171,7 @@ jQuery(function(){
     });
 
     //Insert Module
-    jQuery('.insert').live('click', function () {
+    jQuery('.insert').on('click', function () {
 
         msf_mid = jQuery(this).attr('rel');
         msf_title = jQuery(this).attr('wname');
@@ -194,7 +194,7 @@ jQuery(function(){
     });
 
     //Delete Module
-    jQuery('.delete_module').live('click',function(){
+    jQuery('.delete_module').on('click',function(){
         jQuery(this).after("<div class='besure' style='display:none;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:99999999;position:absolute;color:#000;border:5px solid rgba(0,0,0,0.4);'><div style='padding:10px;background:#fff;font-family:verdana;font-size:10px'><nobr>Are you sure? <a style='-webkit-border-radius: 15px;-moz-border-radius: 15px;border-radius: 15px;background:#800;padding:4px 8px 6px 8px;color:#fff;text-decoration:none;' href='#' onclick='jQuery(\".besure\").fadeOut(function(){jQuery(this).remove();jQuery(\""+jQuery(this).attr("rel")+"\").slideUp(function(){jQuery(this).remove();});});return false;'>y</a> <a href='' style='-webkit-border-radius: 15px;-moz-border-radius: 15px;border-radius: 15px;background:#080;padding:4px 8px 6px 8px;color:#fff;text-decoration:none;' onclick='jQuery(\".besure\").fadeOut(function(){jQuery(this).remove();mxdm=null;});return false;'>n</a></nobr></div></div>");
         jQuery('.besure').fadeIn();
     });
@@ -214,7 +214,7 @@ jQuery(function(){
         return false;
     });
 
-    jQuery('#module-settings-form').live('submit',function(){
+    jQuery('#module-settings-form').on('submit',function(){
         jQuery(this).append('<img src="images/loading.gif" /> Saving...');
         jQuery(this).ajaxSubmit({
             url:ajaxurl+'?page=minimax&action=module_settings_data',
@@ -247,7 +247,7 @@ jQuery(function(){
     });
 
     // Clone a module
-    jQuery('.module-clone').live('click',function(){
+    jQuery('.module-clone').on('click',function(){
         var col_id = jQuery(this).attr('col_id');
         var res = jQuery(this).attr('mod_set');
         var msf_mid = jQuery(this).attr('mod_id');
@@ -278,7 +278,7 @@ jQuery(function(){
 
 
     //Clone a row
-    jQuery('.rclone').live('click', function () {
+    jQuery('.rclone').on('click', function () {
 
         var d = new Date();
         var new_id = d.getTime();
@@ -296,7 +296,7 @@ jQuery(function(){
     });
 
 
-    jQuery('#layout-settings-form').live('submit', function () {
+    jQuery('#layout-settings-form').on('submit', function () {
         var layout_settings_id = jQuery(this).attr('rel');
         jQuery(this).append('<div style="position: absolute;margin-top: -5px"><img src="images/loading.gif" /> Saving...</div>');
         jQuery(this).ajaxSubmit({
@@ -310,7 +310,7 @@ jQuery(function(){
         return false;
     });
 
-    jQuery('#update-module-settings-form').live('submit', function () {
+    jQuery('#update-module-settings-form').on('submit', function () {
         var datafield = jQuery(this).attr('datafield');
         jQuery(this).append('<img src="images/loading.gif" /> Saving...');
         jQuery(this).ajaxSubmit({
@@ -412,7 +412,7 @@ function reset_layout_width() {
 }
 
  /* Handles module activation/deactivation */
-jQuery('.mod_name').live("click", function () {
+jQuery('.mod_name').on("click", function () {
 
     var obj = this;
     jQuery(this).html('<i class="minimax-icons minimax-loader"></i>');
